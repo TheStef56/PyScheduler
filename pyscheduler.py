@@ -82,8 +82,6 @@ class Scheduler:
                 
     def __main_loop__(self) -> None:
         while True:
-            data = datetime.now() + timedelta(0, self.__get_sleep_time__())
-            data = data.strftime("%Y-%m-%d %H:%M:%S")
             while self.__get_sleep_time__() > 0:
                 time.sleep(1)
             self.__call_func__()
