@@ -23,7 +23,8 @@ class Scheduler:
                 ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
                 print(f'Could not kill thread with pid {thread_id}')
 
-    def __init__(self, blocking = True, mon: str | None = None,
+    def __init__(self, blocking = True, interval = 60,
+                                        mon: str | None = None,
                                         tue: str | None = None,
                                         wed: str | None = None,
                                         thu: str | None = None,
@@ -36,12 +37,15 @@ class Scheduler:
 
             `blocking` = `True` (default) will call the function directly,
             `blocking` = `False` will start the function on a separate thread.
+            `interval` = `60` is how many seconds the main loop will sleep before checking
+            if it is the time to run the function.
             That thread can be killed with `Scheduler.stop_thread()`.
             
             Don't set as function a function that sleeps forever, or the
             thread won't be killed with stop_thread().
         """
         self.blocking = blocking
+        self.interval = interval
         self.__thread__: self.KillableThread | None = None
         self.schedules = {
             0: mon,
@@ -82,12 +86,10 @@ class Scheduler:
                 
     def __main_loop__(self) -> None:
         while True:
-            data = datetime.now() + timedelta(0, self.__get_sleep_time__())
-            data = data.strftime("%Y-%m-%d %H:%M:%S")
             while self.__get_sleep_time__() > 0:
                 time.sleep(1)
             self.__call_func__()
-            time.sleep(60)
+            time.sleep(self.interval)
 
     def set_function(self, function: callable, *args, **kwargs):
         self.function = function
